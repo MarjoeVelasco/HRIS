@@ -1,0 +1,392 @@
+@extends('users.userslayouts.master')
+@section('content')
+@section('title', 'Vote Confirmation')
+
+<div class="container d-flex justify-content-center mt-2">
+@include('inc.messages')
+   <div class="card col-sm-8 col-md-9 rounded">
+        <p class="mt-3 mb-2 text-uppercase text-dark font-weight-bold text-center" style="font-size:1.6em;">{{$election_title}}</p>
+        <hr class="mt-0 mb-0">
+            <p class="mt-1 small text-center">Reporting as of <b><span class="text-success">{{$current_date}}</span></b> <b><span id="live_time_results" class="text-success">TIME</span></b>. Unofficial-partial results based on real-time data from the ballot server.</p>
+   </div>
+</div>
+
+
+<!-- ILSEA 2nd level rep START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>ILSEA Second-Level Representative (Alternate)</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($president as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                <!--
+                <td><img src="{{url('/images/user/avatar-unisex.png')}}" height="25px" class="rounded-circle"> {{Str::limit($candidate->lastname,1,'****')}} </td>
+                -->
+
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- ILSEA 2nd level rep END -->
+
+<!-- CODI Supervisory Position START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>CODI Supervisory Position</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($president as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                <!--
+                <td><img src="{{url('/images/user/avatar-unisex.png')}}" height="25px" class="rounded-circle"> {{Str::limit($candidate->lastname,1,'****')}} </td>
+                -->
+
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- CODI Supervisory Position START -->
+
+
+<!-- CODI Rank and File Position START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>CODI Rank and File Position</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($president as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                
+                <!--
+                <td><img src="{{url('/images/user/avatar-unisex.png')}}" height="25px" class="rounded-circle"> {{Str::limit($candidate->lastname,1,'****')}} </td>
+                -->
+
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- CODI Supervisory Position START -->
+
+<!-- PRESIDENT START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>President</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($president as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                <!--
+                <td><img src="{{url('/images/user/avatar-unisex.png')}}" height="25px" class="rounded-circle"> {{Str::limit($candidate->lastname,1,'****')}} </td>
+                -->
+
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- PRESIDENT END -->
+
+
+<!-- VICE PRESIDENT START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>Vice-President</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($vice_president as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- END -->
+
+
+<!-- SECRETARY START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>Secretary</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($secretary as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- END -->
+
+<!-- TREASURER START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>Treasurer</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($treasurer as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- END -->
+
+
+<!-- BOOKKEEPER START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>Bookkeeper</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($bookkeeper as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- END -->
+
+<!-- AUDITOR START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>Auditor</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($auditor as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- END -->
+
+<!-- pro START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>Public Relations Officer</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($pro as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- END -->
+
+
+<!-- FIRST LEVEL START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>First-Level Representative</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($first_level as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- END -->
+
+
+<!-- SECOND LEVEL START -->
+<div class="container d-flex justify-content-center mt-2 mb-4">
+<div class="col-sm-8 col-md-9">    
+<span class="text-dark h5"><b>Second-Level Representative</b></span><br>
+    <table class="table table-borderless text-dark">
+        <thead>
+            <tr>
+                <th width="10%" class="text-center">Rank</th>
+                <th>Candidate</th>
+                <th width="10%" class="text-center">Votes</th>
+                <th width="10%"class="text-center">Percent</th>
+            </tr>
+        </thead>
+    <tbody class="bg-white text-uppercase" style="font-size:1em;font-weight:900;">
+
+        @foreach($second_level as $candidate)
+            <tr>
+                <td class="text-center">{{$candidate->rank}}</td>
+                <td><img src="{{url ($candidate->image)}}" height="25px" class="rounded"> {{$candidate->firstname}} {{$candidate->lastname}}</td>
+                <td class="text-center">{{$candidate->occurrences}}</td>
+                <td class="text-center">{{$candidate->percent}}%</td>
+            </tr>
+        @endforeach   
+    </tbody>
+    </table>
+</div>
+</div>
+<!-- END -->
+
+
+
+@stop

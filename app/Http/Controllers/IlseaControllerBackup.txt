@@ -1,0 +1,457 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Voters;
+use App\Employee;
+use App\User;
+use App\Categories;
+use App\Ballots;
+use App\Forms;
+use DB;
+use App\ErrorLog;
+use App\Events\VotesUpdated;
+
+class IlseaController extends Controller {
+    
+    public function __construct() {
+        $this->middleware(['auth', 'isElectionCommittee']); 
+    }
+
+    public function resolution() {
+
+        $form = Forms::select('id')->where('status',1)->first();
+        return view('users.ilsea.resolution')->with('form',$form);
+    }
+
+
+
+    public function submitVote(Request $request) {
+
+        $validatedData = $request->validate([
+            'president' =>      ['required','different:vice_president','different:secretary','different:treasurer','different:bookkeeper','different:auditor','different:pro','different:first_level','different:second_level'],
+            'vice_president' => ['required','different:president','different:secretary','different:treasurer','different:bookkeeper','different:auditor','different:pro','different:first_level','different:second_level'],
+            'secretary' =>      ['required','different:president','different:vice_president','different:treasurer','different:bookkeeper','different:auditor','different:pro','different:first_level','different:second_level'],
+            'treasurer' =>      ['required','different:president','different:vice_president','different:secretary','different:bookkeeper','different:auditor','different:pro','different:first_level','different:second_level'],
+            'bookkeeper' =>     ['required','different:president','different:vice_president','different:secretary','different:treasurer','different:auditor','different:pro','different:first_level','different:second_level'],
+            'auditor' =>        ['required','different:president','different:vice_president','different:secretary','different:treasurer','different:bookkeeper','different:pro','different:first_level','different:second_level'],
+            'pro' =>            ['required','different:president','different:vice_president','different:secretary','different:treasurer','different:bookkeeper','different:auditor','different:first_level','different:second_level'],
+            'first_level' =>    ['required','different:president','different:vice_president','different:secretary','different:treasurer','different:bookkeeper','different:auditor','different:pro','different:second_level'],
+            'second_level' =>   ['required','different:president','different:vice_president','different:secretary','different:treasurer','different:bookkeeper','different:auditor','different:pro','different:first_level'],
+        ]);
+
+        $reference_number = $this->generateReference();
+        
+        //get current active form
+        $form = Forms::select('id')->where('status',1)->first();
+
+        //get ballot number
+        $voter = Voters::where('user_id',auth()->user()->id)->where('form_id',$form->id)->select('ballot_number')->first();
+		
+		//check if voted
+        if(Ballots::where('form_id',$form->id)->where('ballot_number',$voter->ballot_number)->exists()) {
+            return redirect('/vote-confirmation')->with('success','You have already voted');
+        }
+
+        //president
+        $ballots = Ballots::create([
+            'reference_number' => $reference_number,
+            'ballot_number' => $voter->ballot_number,
+            'form_id' => $form->id,
+            'category_id' => $request->input( 'pres_id'),
+            'user_id' => $request->get( 'president'),
+        ]);
+
+        //vice president
+        Ballots::create([
+            'reference_number' => $reference_number,
+            'ballot_number' => $voter->ballot_number,
+            'form_id' => $form->id,
+            'category_id' => $request->input( 'vice_pres_id'),
+            'user_id' => $request->get( 'vice_president'),
+        ]);
+
+        //secretary
+        Ballots::create([
+            'reference_number' => $reference_number,
+            'ballot_number' => $voter->ballot_number,
+            'form_id' => $form->id,
+            'category_id' => $request->input( 'sec_id'),
+            'user_id' => $request->get( 'secretary'),
+        ]);
+
+        //treasurer
+        Ballots::create([
+            'reference_number' => $reference_number,
+            'ballot_number' => $voter->ballot_number,
+            'form_id' => $form->id,
+            'category_id' => $request->input( 'treasurer_id'),
+            'user_id' => $request->get( 'treasurer'),
+        ]);
+
+        //bookkeeper
+        Ballots::create([
+            'reference_number' => $reference_number,
+            'ballot_number' => $voter->ballot_number,
+            'form_id' => $form->id,
+            'category_id' => $request->input( 'bookkeeper_id'),
+            'user_id' => $request->get( 'bookkeeper'),
+        ]);
+
+        //auditor
+        Ballots::create([
+            'reference_number' => $reference_number,
+            'ballot_number' => $voter->ballot_number,
+            'form_id' => $form->id,
+            'category_id' => $request->input( 'audit_id'),
+            'user_id' => $request->get( 'auditor'),
+        ]);
+
+        //pro
+        Ballots::create([
+            'reference_number' => $reference_number,
+            'ballot_number' => $voter->ballot_number,
+            'form_id' => $form->id,
+            'category_id' => $request->input( 'pro_id'),
+            'user_id' => $request->get( 'pro'),
+        ]);
+
+        //first level representative
+        Ballots::create([
+            'reference_number' => $reference_number,
+            'ballot_number' => $voter->ballot_number,
+            'form_id' => $form->id,
+            'category_id' => $request->input('first_level_id'),
+            'user_id' => $request->get('first_level'),
+        ]);
+
+        //second level representative
+        Ballots::create([
+            'reference_number' => $reference_number,
+            'ballot_number' => $voter->ballot_number,
+            'form_id' => $form->id,
+            'category_id' => $request->input('second_level_id'),
+            'user_id' => $request->get('second_level'),
+        ]);
+
+        //event(new VotesUpdated($ballots));
+
+        
+
+
+        return redirect('/vote-confirmation')->with('success','Voter has been added');
+        
+
+    }
+
+    public function confirmation() {
+
+        //get ballot number and reference_number and date_time
+        $ballots = DB::table('ballots')
+                ->join('voters','ballots.ballot_number','=','voters.ballot_number')
+                ->where('voters.user_id',auth()->user()->id)
+                ->select('ballots.reference_number','ballots.created_at','ballots.form_id')
+                ->limit(1)
+                ->get();
+        
+
+        return view('users.ilsea.confirmation')->with('ballots',$ballots);
+    }
+
+    public function results($id) {
+
+        //form disabled
+        if(Forms::where('status',0)->where('id',$id)->exists()) {
+            return redirect('/home')->with('error','form not found');
+        }
+
+        $forms = Forms::select('title')->where('id',$id)->first();
+        $election_title=$forms->title;
+
+        $current_date = date('F d, Y');
+
+        //categories
+        $pres = Categories::where('title','President')->select('id')->first();
+        $vice_pres = Categories::where('title','Vice-President')->select('id')->first();
+        $sec = Categories::where('title','Secretary')->select('id')->first();
+        $treasurer = Categories::where('title','Treasurer')->select('id')->first();
+        $bookkeeper = Categories::where('title','Bookkeeper')->select('id')->first();
+        $audit = Categories::where('title','Auditor')->select('id')->first();
+        $pro = Categories::where('title','Public Relations Officer')->select('id')->first();
+        $first_level = Categories::where('title','First-Level Representative')->select('id')->first();
+        $second_level = Categories::where('title','Second-Level Representative')->select('id')->first();
+
+        //get results for president
+        $president = DB::table('ballots')
+                    ->join('employees','ballots.user_id','=','employees.employee_id')
+                    ->join('users','ballots.user_id','=','users.id')
+                    ->select('employees.firstname','employees.lastname','users.image',DB::raw('ballots.user_id, count(user_id) AS occurrences, round(count(user_id)/(select count(*) from ballots where category_id=3) * 100) as percent, RANK() OVER (ORDER BY occurrences desc) as rank'))
+                    ->where('ballots.category_id',$pres->id)
+                    ->groupBy('ballots.user_id','employees.firstname','employees.lastname','users.image')
+                    ->orderBy('occurrences', 'DESC')
+                    ->limit(5)
+                    ->get();
+        
+        //get results for president
+        $vice_president = DB::table('ballots')
+                    ->join('employees','ballots.user_id','=','employees.employee_id')
+                    ->join('users','ballots.user_id','=','users.id')
+                    ->select('employees.firstname','employees.lastname','users.image',DB::raw('ballots.user_id, count(user_id) AS occurrences, round(count(user_id)/(select count(*) from ballots where category_id=3) * 100) as percent, RANK() OVER (ORDER BY occurrences desc) as rank'))
+                    ->where('ballots.category_id',$vice_pres->id)
+                    ->groupBy('ballots.user_id','employees.firstname','employees.lastname','users.image')
+                    ->orderBy('occurrences', 'DESC')
+                    ->limit(5)
+                    ->get();
+
+        //get results for president
+        $secretary = DB::table('ballots')
+                    ->join('employees','ballots.user_id','=','employees.employee_id')
+                    ->join('users','ballots.user_id','=','users.id')
+                    ->select('employees.firstname','employees.lastname','users.image',DB::raw('ballots.user_id, count(user_id) AS occurrences, round(count(user_id)/(select count(*) from ballots where category_id=3) * 100) as percent, RANK() OVER (ORDER BY occurrences desc) as rank'))
+                    ->where('ballots.category_id',$sec->id)
+                    ->groupBy('ballots.user_id','employees.firstname','employees.lastname','users.image')
+                    ->orderBy('occurrences', 'DESC')
+                    ->limit(5)
+                    ->get();
+
+        //get results for president
+        $treasurer = DB::table('ballots')
+                    ->join('employees','ballots.user_id','=','employees.employee_id')
+                    ->join('users','ballots.user_id','=','users.id')
+                    ->select('employees.firstname','employees.lastname','users.image',DB::raw('ballots.user_id, count(user_id) AS occurrences, round(count(user_id)/(select count(*) from ballots where category_id=3) * 100) as percent, RANK() OVER (ORDER BY occurrences desc) as rank'))
+                    ->where('ballots.category_id',$treasurer->id)
+                    ->groupBy('ballots.user_id','employees.firstname','employees.lastname','users.image')
+                    ->orderBy('occurrences', 'DESC')
+                    ->limit(5)
+                    ->get();
+
+        //get results for president
+        $bookkeeper = DB::table('ballots')
+                    ->join('employees','ballots.user_id','=','employees.employee_id')
+                    ->join('users','ballots.user_id','=','users.id')
+                    ->select('employees.firstname','employees.lastname','users.image',DB::raw('ballots.user_id, count(user_id) AS occurrences, round(count(user_id)/(select count(*) from ballots where category_id=3) * 100) as percent, RANK() OVER (ORDER BY occurrences desc) as rank'))
+                    ->where('ballots.category_id',$bookkeeper->id)
+                    ->groupBy('ballots.user_id','employees.firstname','employees.lastname','users.image')
+                    ->orderBy('occurrences', 'DESC')
+                    ->limit(5)
+                    ->get();
+
+        //get results for president
+        $auditor = DB::table('ballots')
+                    ->join('employees','ballots.user_id','=','employees.employee_id')
+                    ->join('users','ballots.user_id','=','users.id')
+                    ->select('employees.firstname','employees.lastname','users.image',DB::raw('ballots.user_id, count(user_id) AS occurrences, round(count(user_id)/(select count(*) from ballots where category_id=3) * 100) as percent, RANK() OVER (ORDER BY occurrences desc) as rank'))
+                    ->where('ballots.category_id',$audit->id)
+                    ->groupBy('ballots.user_id','employees.firstname','employees.lastname','users.image')
+                    ->orderBy('occurrences', 'DESC')
+                    ->limit(5)
+                    ->get();
+            
+        //get results for president
+        $pro = DB::table('ballots')
+                    ->join('employees','ballots.user_id','=','employees.employee_id')
+                    ->join('users','ballots.user_id','=','users.id')
+                    ->select('employees.firstname','employees.lastname','users.image',DB::raw('ballots.user_id, count(user_id) AS occurrences, round(count(user_id)/(select count(*) from ballots where category_id=3) * 100) as percent, RANK() OVER (ORDER BY occurrences desc) as rank'))
+                    ->where('ballots.category_id',$pro->id)
+                    ->groupBy('ballots.user_id','employees.firstname','employees.lastname','users.image')
+                    ->orderBy('occurrences', 'DESC')
+                    ->limit(5)
+                    ->get();
+        
+        //get results for president
+        $first_level = DB::table('ballots')
+                    ->join('employees','ballots.user_id','=','employees.employee_id')
+                    ->join('users','ballots.user_id','=','users.id')
+                    ->select('employees.firstname','employees.lastname','users.image',DB::raw('ballots.user_id, count(user_id) AS occurrences, round(count(user_id)/(select count(*) from ballots where category_id=3) * 100) as percent, RANK() OVER (ORDER BY occurrences desc) as rank'))
+                    ->where('ballots.category_id',$first_level->id)
+                    ->groupBy('ballots.user_id','employees.firstname','employees.lastname','users.image')
+                    ->orderBy('occurrences', 'DESC')
+                    ->limit(5)
+                    ->get();
+        
+        //get results for president
+        $second_level = DB::table('ballots')
+                    ->join('employees','ballots.user_id','=','employees.employee_id')
+                    ->join('users','ballots.user_id','=','users.id')
+                    ->select('employees.firstname','employees.lastname','users.image',DB::raw('ballots.user_id, count(user_id) AS occurrences, round(count(user_id)/(select count(*) from ballots where category_id=3) * 100) as percent, RANK() OVER (ORDER BY occurrences desc) as rank'))
+                    ->where('ballots.category_id',$second_level->id)
+                    ->groupBy('ballots.user_id','employees.firstname','employees.lastname','users.image')
+                    ->orderBy('occurrences', 'DESC')
+                    ->limit(5)
+                    ->get();
+                            
+        return view('users.ilsea.results',compact('election_title','current_date',
+                'president','vice_president','secretary','treasurer','bookkeeper','auditor','pro','first_level','second_level'));
+    }
+
+
+    public function vote($id) {
+
+        //form disabled
+        if(Forms::where('status',0)->where('id',$id)->exists()) {
+            return redirect('/home')->with('error','form not found');
+        }
+        
+        //get ballot number
+        $voters = Voters::select('ballot_number')
+                        ->where('form_id',$id)
+                        ->where('user_id',auth()->user()->id)
+                        ->first();
+        
+        //check if voted
+        if(Ballots::where('form_id',$id)->where('ballot_number',$voters->ballot_number)->exists()) {
+            return redirect('/vote-confirmation')->with('success','You have already voted');
+        }
+
+        //get form
+        $forms = Forms::select('title','description')->where('id',$id)->first();
+
+        //categories
+        $pres = Categories::where('title','President')->select('id','title','description')->first();
+        $vice_pres = Categories::where('title','Vice-President')->select('id','title','description')->first();
+        $sec = Categories::where('title','Secretary')->select('id','title','description')->first();
+        $treasurer = Categories::where('title','Treasurer')->select('id','title','description')->first();
+        $bookkeeper = Categories::where('title','Bookkeeper')->select('id','title','description')->first();
+        $audit = Categories::where('title','Auditor')->select('id','title','description')->first();
+        $pro = Categories::where('title','Public Relations Officer')->select('id','title','description')->first();
+        $first_level = Categories::where('title','First-Level Representative')->select('id','title','description')->first();
+        $second_level = Categories::where('title','Second-Level Representative')->select('id','title','description')->first();
+
+        //candidates
+        $pres_candidate = DB::table('candidates')
+                          ->join('users','candidates.user_id','=','users.id')
+                          ->join('employees','users.id','=','employees.employee_id')
+                          ->join('categories','candidates.category_id','=','categories.id')
+                          ->join('forms','candidates.form_id','=','forms.id')
+                          ->select('users.image','employees.firstname','employees.lastname','users.id')
+                          ->where('candidates.category_id',$pres->id)
+                          ->where('candidates.form_id',$id)
+                          ->orderBy('employees.lastname','ASC')
+                          ->get();
+
+        $vice_pres_candidate = DB::table('candidates')
+                          ->join('users','candidates.user_id','=','users.id')
+                          ->join('employees','users.id','=','employees.employee_id')
+                          ->join('categories','candidates.category_id','=','categories.id')
+                          ->join('forms','candidates.form_id','=','forms.id')
+                          ->select('users.image','employees.firstname','employees.lastname','users.id')
+                          ->where('candidates.category_id',$vice_pres->id)
+                          ->where('candidates.form_id',$id)
+                          ->orderBy('employees.lastname','ASC')
+                          ->get();
+
+        $sec_candidate = DB::table('candidates')
+                          ->join('users','candidates.user_id','=','users.id')
+                          ->join('employees','users.id','=','employees.employee_id')
+                          ->join('categories','candidates.category_id','=','categories.id')
+                          ->join('forms','candidates.form_id','=','forms.id')
+                          ->select('users.image','employees.firstname','employees.lastname','users.id')
+                          ->where('candidates.category_id',$sec->id)
+                          ->where('candidates.form_id',$id)
+                          ->orderBy('employees.lastname','ASC')
+                          ->get();
+
+        $treasurer_candidate = DB::table('candidates')
+                          ->join('users','candidates.user_id','=','users.id')
+                          ->join('employees','users.id','=','employees.employee_id')
+                          ->join('categories','candidates.category_id','=','categories.id')
+                          ->join('forms','candidates.form_id','=','forms.id')
+                          ->select('users.image','employees.firstname','employees.lastname','users.id')
+                          ->where('candidates.category_id',$treasurer->id)
+                          ->where('candidates.form_id',$id)
+                          ->orderBy('employees.lastname','ASC')
+                          ->get();
+
+        $bookkeeper_candidate = DB::table('candidates')
+                          ->join('users','candidates.user_id','=','users.id')
+                          ->join('employees','users.id','=','employees.employee_id')
+                          ->join('categories','candidates.category_id','=','categories.id')
+                          ->join('forms','candidates.form_id','=','forms.id')
+                          ->select('users.image','employees.firstname','employees.lastname','users.id')
+                          ->where('candidates.category_id',$bookkeeper->id)
+                          ->where('candidates.form_id',$id)
+                          ->orderBy('employees.lastname','ASC')
+                          ->get();
+
+        $audit_candidate = DB::table('candidates')
+                          ->join('users','candidates.user_id','=','users.id')
+                          ->join('employees','users.id','=','employees.employee_id')
+                          ->join('categories','candidates.category_id','=','categories.id')
+                          ->join('forms','candidates.form_id','=','forms.id')
+                          ->select('users.image','employees.firstname','employees.lastname','users.id')
+                          ->where('candidates.category_id',$audit->id)
+                          ->where('candidates.form_id',$id)
+                          ->orderBy('employees.lastname','ASC')
+                          ->get();
+
+        $pro_candidate = DB::table('candidates')
+                          ->join('users','candidates.user_id','=','users.id')
+                          ->join('employees','users.id','=','employees.employee_id')
+                          ->join('categories','candidates.category_id','=','categories.id')
+                          ->join('forms','candidates.form_id','=','forms.id')
+                          ->select('users.image','employees.firstname','employees.lastname','users.id')
+                          ->where('candidates.category_id',$pro->id)
+                          ->where('candidates.form_id',$id)
+                          ->orderBy('employees.lastname','ASC')
+                          ->get();
+
+        $first_level_candidate = DB::table('candidates')
+                          ->join('users','candidates.user_id','=','users.id')
+                          ->join('employees','users.id','=','employees.employee_id')
+                          ->join('categories','candidates.category_id','=','categories.id')
+                          ->join('forms','candidates.form_id','=','forms.id')
+                          ->select('users.image','employees.firstname','employees.lastname','users.id')
+                          ->where('candidates.category_id',$first_level->id)
+                          ->where('candidates.form_id',$id)
+                          ->orderBy('employees.lastname','ASC')
+                          ->get();
+        
+        $second_level_candidate = DB::table('candidates')
+                          ->join('users','candidates.user_id','=','users.id')
+                          ->join('employees','users.id','=','employees.employee_id')
+                          ->join('categories','candidates.category_id','=','categories.id')
+                          ->join('forms','candidates.form_id','=','forms.id')
+                          ->select('users.image','employees.firstname','employees.lastname','users.id')
+                          ->where('candidates.category_id',$second_level->id)
+                          ->where('candidates.form_id',$id)
+                          ->orderBy('employees.lastname','ASC')
+                          ->get();
+    
+        return view('users.ilsea.vote',compact('voters','forms',
+                                        'pres','vice_pres','sec','treasurer','bookkeeper','audit','pro','first_level','second_level',
+                                        'pres_candidate','vice_pres_candidate','sec_candidate','treasurer_candidate','bookkeeper_candidate','audit_candidate','pro_candidate','first_level_candidate','second_level_candidate',));
+    }
+
+    private function generateReference() {
+        $number = mt_rand(10000000, 99999999);
+
+        if ($this->referenceExists($number)) {
+            return $this->generateReference();
+        }
+    
+        return $number;    
+    }
+
+    private function referenceExists($number) { 
+        // query the database and return a boolean
+        return Ballots::where('reference_number',$number)->exists();
+    }
+
+    public function leaderboard () {
+
+        $ballots = DB::table('ballots')
+                    ->join('employees','ballots.user_id','=','employees.employee_id')
+                    ->join('users','ballots.user_id','=','users.id')
+                    ->select('employees.firstname','employees.lastname','users.image',DB::raw('ballots.user_id, count(user_id) AS occurrences, round(count(user_id)/(select count(*) from ballots where category_id=3) * 100) as percent, RANK() OVER (ORDER BY occurrences desc) as rank'))
+                    ->where('ballots.category_id',2)
+                    ->groupBy('ballots.user_id','employees.firstname','employees.lastname','users.image')
+                    ->orderBy('occurrences', 'DESC')
+                    ->limit(5)
+                    ->get();
+
+
+        return $ballots;
+    }
+
+}

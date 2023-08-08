@@ -1,0 +1,19 @@
+User-agent: *
+
+Disallow: /css/
+
+Disallow: /css1/
+
+Disallow: /fonts/
+
+Disallow: /images/
+
+Disallow: /js/
+
+Disallow: /js1/
+
+Disallow: /plugins/
+
+Disallow: /webfonts/
+
+Disallow: /word-template/

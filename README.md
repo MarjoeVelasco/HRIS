@@ -33,7 +33,7 @@ Make sure you have PHP, Composer, and Laravel installed on your machine. If not,
 Clone the repository to your local machine using the following command:
 
 ```bash
-git clone https://github.com/your-username/simplehr.git
+git clone https://github.com/MarjoeVelasco/HRIS.git
 cd HRIS
 composer install
 ```
